@@ -1,0 +1,32 @@
+@import "../../../../../public/assets/styles/variables";
+@import '../../../../../public/assets/styles/mixins';
+@import '../../../../../public/assets/styles/personal';
+@import '../../../../../public/assets/styles/data-form';
+
+.info{
+    padding-top: 50px;
+    padding-bottom: 128px;
+    position: relative;
+    overflow: hidden;
+
+    .container{
+        .data-form{
+            .button{
+                width: 169px;
+            }
+        }
+        
+    }
+
+    .page-image{
+        position: absolute;
+        bottom: 0;
+        right: calc(50% - 700px);
+        z-index: -1;
+
+        img{
+            vertical-align: bottom;
+            
+        }
+    }
+}
