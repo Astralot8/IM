@@ -9,7 +9,7 @@ import { ProductService } from '../../services/product.service';
 import { ProductType } from '../../../../types/product.type';
 import { environment } from '../../../../environments/environment';
 import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs';
+import { debounceTime, Subject } from 'rxjs';
 import { LoaderService } from '../../services/loader.service';
 
 @Component({
@@ -20,6 +20,7 @@ import { LoaderService } from '../../services/loader.service';
 })
 export class HeaderComponent implements OnInit {
   count: number = 0;
+  // count$: Subject<number> = new Subject<number>;
   isLogged: boolean = false;
   @Input() categories: CategoryWithTypeType[] = [];
 
@@ -35,29 +36,35 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
 
     this.searchField.valueChanges
-    .pipe(
-      debounceTime(500)
-    )
-    .subscribe((value) => {
-      if (value && value.length > 2) {
-            this.productService.searchProducts(value).subscribe((data: ProductType[]) => {
-              this.products = data;
-              this.showedSearch = true;
-            })
-          } else {
-            this.products = [];
-          }
-    });
+      .pipe(
+        debounceTime(500)
+      )
+      .subscribe((value) => {
+        if (value && value.length > 2) {
+          this.productService.searchProducts(value).subscribe((data: ProductType[]) => {
+            this.products = data;
+            this.showedSearch = true;
+          })
+        } else {
+          this.products = [];
+        }
+      });
 
-    this.authService.isLogged$.subscribe((isLoggedIn) => {
-      this.isLogged = isLoggedIn;
-    })
+    
 
     this.cartService.getCartCount().subscribe((data: { count: number } | DefaultResponseType) => {
       if ((data as DefaultResponseType).error !== undefined) {
         throw new Error((data as DefaultResponseType).message);
       }
-      this.count = (data as { count: number }).count;
+      this.authService.isLogged$.subscribe((isLoggedIn) => {
+        if (isLoggedIn) {
+          this.isLogged = isLoggedIn;
+          this.count = (data as { count: number }).count;
+        } else {
+          this.isLogged = isLoggedIn;
+          this.count = 0;
+        }
+      })
     })
 
     this.cartService.count$.subscribe(count => {
@@ -104,9 +111,9 @@ export class HeaderComponent implements OnInit {
   }
 
   @HostListener('document:click', ['$event'])
-  click(event: Event){
-      if(this.showedSearch && (event.target as HTMLElement).className.indexOf('search-product') === -1){
-        this.showedSearch = false;
-      }
+  click(event: Event) {
+    if (this.showedSearch && (event.target as HTMLElement).className.indexOf('search-product') === -1) {
+      this.showedSearch = false;
+    }
   }
 }

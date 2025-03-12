@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ProductService } from '../../../shared/services/product.service';
 import { ProductType } from '../../../../types/product.type';
 import { CategoryService } from '../../../shared/services/category.service';
@@ -33,7 +33,7 @@ export class CatalogComponent implements OnInit {
 
   appliedFilters: AppliedFilterType[] = [];
 
-  sortingOpen = false;
+  sortingOpen: boolean = false;
 
   sortingOptions: { name: string, value: string }[] = [
     { name: 'От А до Я', value: 'az-asc' },
@@ -46,12 +46,14 @@ export class CatalogComponent implements OnInit {
   cart: CartType | null = null;
   favoriteProducts: FavoriteType[] | null = null;
 
-  constructor(private productService: ProductService, 
-    private categoryService: CategoryService, 
-    private activatedRouter: ActivatedRoute, 
-    private router: Router, 
-    private cartService: CartService, 
-    private favoriteService: FavoriteService, 
+  showedSearch: boolean = false;
+
+  constructor(private productService: ProductService,
+    private categoryService: CategoryService,
+    private activatedRouter: ActivatedRoute,
+    private router: Router,
+    private cartService: CartService,
+    private favoriteService: FavoriteService,
     private authService: AuthService) {
 
   }
@@ -63,7 +65,7 @@ export class CatalogComponent implements OnInit {
       }
       this.cart = data as CartType;
 
-      if(this.authService.getIsLoggedIn()){
+      if (this.authService.getIsLoggedIn()) {
         this.favoriteService.getFavorite().subscribe(
           {
             next: (data: FavoriteType[] | DefaultResponseType) => {
@@ -72,7 +74,7 @@ export class CatalogComponent implements OnInit {
                 this.processCatalog();
                 throw new Error(error);
               }
-  
+
               this.favoriteProducts = data as FavoriteType[];
               this.processCatalog();
             },
@@ -83,7 +85,7 @@ export class CatalogComponent implements OnInit {
       } else {
         this.processCatalog();
       }
-      
+
     });
   }
 
@@ -155,10 +157,10 @@ export class CatalogComponent implements OnInit {
               this.products = data.items;
             }
 
-            if(this.favoriteProducts){
+            if (this.favoriteProducts) {
               this.products = this.products.map(product => {
                 const productInFavorite = this.favoriteProducts?.find(item => item.id === product.id);
-                if(productInFavorite) {
+                if (productInFavorite) {
                   product.isInFavorite = true;
                 }
                 return product;
@@ -210,11 +212,26 @@ export class CatalogComponent implements OnInit {
     }
   }
   openNextPage() {
-    if (this.activeParams.page && this.activeParams.page < this.pages.length) {
+    if (!this.activeParams.page) {
+      this.activeParams.page = 1;
       this.activeParams.page++;
       this.router.navigate(['/catalog'], {
         queryParams: this.activeParams
       });
+    } else if (this.activeParams.page && this.activeParams.page < this.pages.length) {
+      this.activeParams.page++;
+
+
+      this.router.navigate(['/catalog'], {
+        queryParams: this.activeParams
+      });
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  click(event: Event) {
+    if (this.sortingOpen && (event.target as HTMLElement).className.indexOf('catalog-sorting-head') === -1) {
+      this.sortingOpen = false;
     }
   }
 

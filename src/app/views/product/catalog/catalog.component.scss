@@ -61,6 +61,7 @@
 
                     span {
                         margin-right: 8px;
+                        z-index: -1;
                     }
                 }
 
@@ -97,6 +98,9 @@
                         background: #ebebeb;
                         border-radius: 5px 5px 0 0;
                         padding-right: 23px;
+                        span{
+                            z-index:0;
+                        }
                     }
 
                     .catalog-sorting-body {
