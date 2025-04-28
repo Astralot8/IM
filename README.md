@@ -1,8 +1,8 @@
 # Backend
 
 cd backend/
-npm i
-npm start
+init: npm i
+start: npm start
 
 # Frontend
 
